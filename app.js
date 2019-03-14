@@ -9,7 +9,7 @@ var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeigh
 var renderer = new THREE.WebGLRenderer( {antialias:true});
 
 //Configure renderer clear color
-renderer.setClearColor("white");
+renderer.setClearColor("#00b5cc");
 renderer.shadowMap = true;
 
 // Configure renderer size
@@ -27,23 +27,27 @@ document.body.appendChild( renderer.domElement );
 //----------------------------------------------------------------------------------------
 //
 //---------------------------------------------------------------------------------------
-var geometry = new THREE.PlaneBufferGeometry(130,130,1,1);
-var material = new THREE.MeshBasicMaterial({color: "brown"});
+var geometry = new THREE.PlaneBufferGeometry(130,130,20,20);
+var material = new THREE.MeshPhongMaterial({color: "#f2784b"});
 material.side = THREE.DoubleSide;
 var plane = new THREE.Mesh(geometry, material);
+plane.receiveShadow = true;
+
 plane.rotation.x = -0.5 * Math.PI;
 plane.position.x = 15;
 plane.position.y = -4.04; 
 //-----------------------------First Hut -------------------------------------------------------
 // first hut roof 
 var geometry = new THREE.CylinderGeometry( 0, 10, 10, 16, true );
-var material = new THREE.MeshBasicMaterial( {color: 0x8F8073} );
+var material = new THREE.MeshPhongMaterial( {color: 0x8F8073} );
 var cylinder = new THREE.Mesh( geometry, material );
+cylinder.castShadow = true;
 
 // first hut wall structure
 geometry = new THREE.CylinderGeometry(7, 7,10,24, true);
-material = new THREE.MeshBasicMaterial({color: 0x12130F});
+material = new THREE.MeshPhongMaterial({color: 0x12130F});
 var bottomCylinder = new THREE.Mesh( geometry, material);
+bottomCylinder.castShadow = true;
 
 // door cylinder
 geometry = new THREE.CylinderGeometry(3, 3, 7.2, 5, true);
@@ -60,13 +64,15 @@ var windowCylinder = new THREE.Mesh(geometry, material);
 //-------------------------------------Second Hut---------------------------------------------
 // second hut roof
 geometry = new THREE.CylinderGeometry( 0, 10, 10, 16, true );
-material = new THREE.MeshBasicMaterial( {color: 0x8F8073} );
+material = new THREE.MeshLambertMaterial( {color: 0x8F8073} );
 var secondHutRoof = new THREE.Mesh( geometry, material );
+secondHutRoof.castShadow =true;
 
 // second hut wall
 geometry = new THREE.CylinderGeometry(7, 7,10,24, true);
-material = new THREE.MeshBasicMaterial({color: 0x12130F});
+material = new THREE.MeshLambertMaterial({color: 0x12130F});
 var secondHutBbottom = new THREE.Mesh( geometry, material);
+secondHutBbottom.castShadow =true;
 
 // second door
 geometry = new THREE.CylinderGeometry(3, 3, 7.2, 5, true);
@@ -78,66 +84,42 @@ var secondHutDoor = new THREE.Mesh(geometry, material);
 //-------------------------------Igloo---------------------------------------------------------
 
 geometry = new THREE.SphereBufferGeometry(14, 15, 40, 45, 2* Math.PI, 0 ,0.5  * Math.PI);
-material = new THREE.MeshBasicMaterial( {color: 0x8F8073} );
+material = new THREE.MeshPhongMaterial( {color: 0x8F8073} );
 var sphere = new THREE.Mesh( geometry, material);
-
+sphere.castShadow = true;
 
 geometry = new THREE.CylinderGeometry(12 ,12 , 6.5 , 30);
-material = new THREE.MeshBasicMaterial({color: 0x12130F});
+material = new THREE.MeshPhongMaterial({color: 0x12130F});
 var iglooBottom = new THREE.Mesh(geometry, material);
-
+iglooBottom.castShadow =true;
 
 /*----------------------------------------------------------------------------------------
 *                             Water              
 *                                                                                        * 
 *****************************************************************************************/
-
-const mat = new THREE.MeshPhongMaterial({
-    color:0x2288ff,
-    shininess:100,
-    wireframe:false,
-})
-
-mat.onBeforeCompile = (shader) => {
-    shader.uniforms.time = { value: 0}
-    shader.vertexShader = `
-        uniform float time;
-    ` + shader.vertexShader
-
-    const token = '#include <begin_vertex>'
-    //equation for normals from:
-    // https://stackoverflow.com/questions/9577868/glsl-calculate-surface-normal
-    const customTransform = `
-        vec3 transformed = vec3(position);
-        float dx = position.x;
-        float dy = position.y;
-        float freq = sqrt(dx*dx + dy*dy);
-        float amp = 0.1;
-        float angle = -time*10.0+freq*6.0;
-        transformed.z += sin(angle)*amp;
-
-        objectNormal = normalize(vec3(0.0,-amp * freq * cos(angle),1.0));
-        vNormal = normalMatrix * objectNormal;
-    `
-    shader.vertexShader = shader.vertexShader.replace(token,customTransform)
-    matShader = shader
-}
 geometry = new THREE.CylinderGeometry(12 ,12 , 1 , 30);
-var smallPond = new THREE.Mesh(geometry,mat);
-
-
-
+material = new THREE.MeshBasicMaterial({color: 0x9be3fd});
+var smallPond = new THREE.Mesh(geometry,material);
 
 /*--------------------------------------------------------------------------------------------
 *
 *
 ------------------------------------Light Source---------------------------------------------------*/
-var light = new THREE.SpotLight("white", 1);
+var ambiColor = "#0c0c0c";
+var ambientLight = new THREE.AmbientLight(ambiColor);
+scene.add(ambientLight);
+
+
+var light = new THREE.SpotLight("#ffffff", 1);
+light.position.set(-40, 60, -10);
 light.castShadow = true;
+light.target = plane;
+light.shadowCameraVisible = true;
+
 
 //-----------------------------create light sphere---------------------------------------
 geometry = new THREE.SphereBufferGeometry(10,24,24);
-material = new THREE.MeshPhongMaterial({color: "blue", shininess:100,wireframe:false,});
+material = new THREE.MeshBasicMaterial({color: "yellow"});
 var sun = new THREE.Mesh(geometry, material)
 
 
@@ -178,14 +160,14 @@ secondHutDoor.position.set(60, -1.0, 9.572);
 smallPond.position.set (20.0, -4.50, 30);
 
 //-----------------------light position in the scene --------------------------------------
-light.position.set(50,70,-60);
+scene.add(light);
 
 
 /*****************************************************************************************
 *                               Gui interface
 *
 ******************************************************************************************/
-var check = {rotate: false, direction: false, rotationSpeed: 0.01, Zoom: 130 }
+var check = {rotate: false, direction: false, rotationSpeed: 0.01, Zoom: 1 }
 
 // create a gui control box
 var gui = new dat.GUI();
@@ -194,9 +176,9 @@ var gui = new dat.GUI();
 gui.add(check, 'rotate').onChange( function(){} );
 gui.add(check, 'direction').onChange( function(){} );
 gui.add(check, 'rotationSpeed', 0.01, 0.10);
-gui.add(check, 'Zoom', 0, 130);
+gui.add(check, 'Zoom', 1, 5);
 
-function cameraZoom(zoom){    
+/*function cameraZoom(zoom){    
    camera.position.z = check.Zoom;
    switch(check.Zoom){
     case 130: camera.position.y = 30;
@@ -212,7 +194,7 @@ function cameraZoom(zoom){
     case 20:  camera.position.y = 5;
         break;
    }
-}
+}*/
 
 /*****************************************************************************************
 *                    Add object into the scene
@@ -223,7 +205,7 @@ function cameraZoom(zoom){
 scene.add(plane);
 //--------------------------add light to scene-------------------------------------------
 light.add(sun);
-scene.add(light);
+
 
 //--------------first hut objects added to the scene-------------------------------------
 
@@ -247,7 +229,7 @@ scene.add(smallPond);
 camera.position.z = 125;
 camera.position.y = 30;
 
-var zoomLastValue = check.Zoom;
+//var zoomLastValue = check.Zoom;
 
 
 // Render Loop
@@ -264,8 +246,9 @@ var render = function () {
         }
     }
 
-        cameraZoom(check.Zoom);
-
+    //    cameraZoom(check.Zoom);
+    camera.zoom = check.Zoom;
+    camera.updateProjectionMatrix();
 
     plane.rotation.z = 0.01;
     // Render the scene
