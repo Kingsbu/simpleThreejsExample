@@ -22,8 +22,8 @@ document.body.appendChild( renderer.domElement );
 // --------------------------------------------
 // FUN START HERE
 // --------------------------------------------- 
-// create a cylinder Geometry
-                          
+// create a cylinder Geometry 
+//                    
 //----------------------------------------------------------------------------------------
 //
 //---------------------------------------------------------------------------------------
@@ -36,6 +36,7 @@ plane.receiveShadow = true;
 plane.rotation.x = -0.5 * Math.PI;
 plane.position.x = 15;
 plane.position.y = -4.04; 
+
 //-----------------------------First Hut -------------------------------------------------------
 // first hut roof 
 var geometry = new THREE.CylinderGeometry( 0, 10, 10, 16, true );
@@ -98,7 +99,7 @@ iglooBottom.castShadow =true;
 *                                                                                        * 
 *****************************************************************************************/
 geometry = new THREE.CylinderGeometry(12 ,12 , 1 , 30);
-material = new THREE.MeshBasicMaterial({color: 0x9be3fd});
+material = new THREE.MeshLambertMaterial({color: 0x9be3fd, opacity:0.4, transparency: true});
 var smallPond = new THREE.Mesh(geometry,material);
 
 /*--------------------------------------------------------------------------------------------
