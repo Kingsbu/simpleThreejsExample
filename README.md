@@ -23,7 +23,11 @@ Copy the project structure as it is and use a server to display the scene
 * [Threejs](https://threejs.org) - The web framework used
 * [Three_particle_fire](https://github.com/yomotsu/three-particle-fire/blob/master) - Flames object used in the night scene
 
+## Day Scene
 
+![](https://github.com/Kingsbu/simpleThreejsExample/blob/master/day_scene.png)
 
+## Night Scene
 
+![](https://github.com/Kingsbu/simpleThreejsExample/blob/master/night_scene.png)
 
